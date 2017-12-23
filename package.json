@@ -1,0 +1,18 @@
+{
+  "name": "daggerlib",
+  "version": "1.0.0",
+  "description": "API for working with Coffman-Graham style Directed Acyclic Graphs",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Rich Insley",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^3.0.2"
+  }
+}
