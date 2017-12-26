@@ -1,6 +1,6 @@
 # Daggerlib.js
 
-Daggerlib.js acheives a Coffman-Graham style directed acycled graph via a resursive set reduction algorithm.  This allows for grouping the topological ordering of nodes into layers of ordinals instead of discrete ordinals.  With layered ordinals, you can perform optimized parallel scheduling of tasks, render Sugiyama-style layered graphs, etc.  
+Daggerlib.js achieves a Coffman-Graham style directed acycled graph via a resursive set reduction algorithm.  This allows for grouping the topological ordering of nodes into layers of ordinals instead of discrete ordinals.  With layered ordinals, you can perform optimized parallel scheduling of tasks, render Sugiyama-style layered graphs, etc.  
 
 ```javascript
 'use strict'
