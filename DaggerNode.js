@@ -6,7 +6,15 @@ const DaggerTypes = require('./DaggerTypes.js');
 const DaggerBasePin = require('./DaggerBasePin.js').DaggerBasePin;
 const DaggerPinCollection = require('./DaggerPinCollection.js').DaggerPinCollection;
 
+/**
+ * Class that represents a node (or vertex) which is the fundamental unit of which DaggerGraphs are formed.  A DaggerNode
+ * can be shared with multiple topologies with each topology having two DaggerPinCollections per node (one for each direction).
+ * @extends DaggerBase
+ */
 class DaggerNode extends DaggerBase {
+    /**
+     * DaggerNode ctor
+     */
     constructor() {
         super();
 
@@ -37,40 +45,79 @@ class DaggerNode extends DaggerBase {
         }
     }
 
+    /**
+     * Get the graph this node belongs to
+     * @returns {DaggerGraph}
+     */
     get parentGraph() {
         return this._parentGraph;
     }
 
+    /**
+     * Get the order of causality for the given topology that this node represents.
+     * @param {number} topology_system 
+     * @returns {number}
+     */
     ordinal(topology_system = 0) {
         return this._ordinal[topology_system];
     }
 
+    /**
+     * Get the index of the subgraph this node belongs to.
+     * @param {number} topology_system 
+     * @returns {number}
+     */
     subgraphAffiliation(topology_system = 0) {
         return this._subgraphAffiliation[topology_system];
     }
 
+    /**
+     * Get the name for this node.
+     */
     get name() {
         return this._name;
     }
+
+    /**
+     * Set the name for this node.
+     */
     set name(newName) {
         this._name = newName;
         this.nameChanged.emit(newName);
     }
 
+    /**
+     * Get the DaggerPinCollection for the input pins of the given topology.
+     * @param {number} topology_system 
+     * @returns {DaggerPinCollection}
+     */
     inputPins(topology_system = 0) {
         return this._inputPins[topology_system];
     }
 
+    /**
+     * Get the DaggerPinCollection for the output pins of the given topology.
+     * @param {number} topology_system 
+     * @returns {DaggerPinCollection}
+     */
     outputPins(topology_system = 0) {
         return this._outputPins[topology_system];
     }
 
-    // return an Array of nodes that I can affect
+    /**
+     * Get the list of nodes that the 'cause' of this node will 'effect'
+     * @param {number} topology_system 
+     * @returns {array}
+     */
     descendents(topology_system = 0) {
         return this._descendents[topology_system].slice();
     }
 
-    // return an Array of nodes that can affect me
+    /**
+     * Get the list of nodes that 'cause' this node.
+     * @param {number} topology_system 
+     * @returns {array}
+     */
     ascendents(topology_system = 0) {
         // any node in my subgraph that contains me as a descendent is on of my ascendents
         let retv = [];
@@ -86,6 +133,11 @@ class DaggerNode extends DaggerBase {
         return retv;
     }
 
+    /**
+     * Get if this node has no connected input pins for the given topology.
+     * @param {number} topology_system 
+     * @returns {boolean}
+     */
     isTopLevel(topology_system = 0) {
         let inpin = null;
 
@@ -102,6 +154,11 @@ class DaggerNode extends DaggerBase {
         return inpin == null;
     }
 
+    /**
+     * Get if this node has no connected output pins for the given topology.
+     * @param {number} topology_system 
+     * @returns {boolean}
+     */
     isBottomLevel(topology_system = 0) {
         let allpins = this._outputPins[topology_system].allPins;
         for(let opin of allpins) {
@@ -112,6 +169,9 @@ class DaggerNode extends DaggerBase {
         return true;
     }
 
+    /**
+     * Disconnect all this node's pins on all of it's topologies.
+     */
     disconnectAllPins() {
         for(let i = 0; i < DaggerTypes.MaxTopologyCount; i++) {
 
@@ -138,20 +198,38 @@ class DaggerNode extends DaggerBase {
         return true;
     }
 
+    /**
+     * Find and return the DaggerOutputPin with the given name.
+     * @param {string} withName 
+     * @param {number} topology_system 
+     * @returns {DaggerOutputPin}
+     */
     getDaggerOutputPin(withName, topology_system = 0) {
         return this._outputPins[topology_system].pin(withName);
     }
 
+    /**
+     * Find and return the DaggerInput with the given name.
+     * @param {string} withName 
+     * @param {number} topology_system 
+     * @returns {DaggerOutputPin}
+     */
     getDaggerInputPin(withName, topology_system = 0) {
         return this._inputPins[topology_system].pin(withName);
     }
 
-    // returns true if node has no input pins
+    /**
+     * Returns true if this node has no input pins.
+     * @param {number} topology_system 
+     */
     isTrueSource(topology_system = 0) {
         return this._inputPins[topology_system].allPins.length === 0;
     }
 
-    // returns true if node has no output pins
+    /**
+     * Returns true if this node has no output pins.
+     * @param {number} topology_system 
+     */
     isTrueDest(topology_system = 0) {
         return this._outputPins[topology_system].allPins.length === 0;
     }
@@ -164,7 +242,12 @@ class DaggerNode extends DaggerBase {
         this._currentTSystemEval = system;
     }
 
-    // called by QDaggerGraph after pins are connected to see if a pin should be cloned
+    /**
+     * Called by DaggerGraph after pins are connected to see if a pin should be cloned.  When subclassing DaggerNode
+     * the subclass SHOULD call super.shouldClonePin.
+     * @param {DaggerBasePin} pin 
+     * @returns {boolean}
+     */
     shouldClonePin(pin) {
         if(pin.autoCloneMaster) {
             if(pin.isInputPin) {
@@ -206,7 +289,12 @@ class DaggerNode extends DaggerBase {
         return retv;
     }
 
-    // rename pin.  Fails if pin is not flagged with canRename
+    /**
+     * rename a given pin.  Fails if pin is not flagged with canRename.  Rarely should a pin be renamed.
+     * @param {DaggerBasePin} pin 
+     * @param {string} pinName 
+     * @returns {boolean}
+     */
     renamePin(pin, pinName) {
         if(!pin.canRename) {
             return false;
@@ -216,9 +304,14 @@ class DaggerNode extends DaggerBase {
         return parentCollection.setPinName(pin, pinName);
     }
 
-    // called by DaggerGraph after pins are connected to clone a pin
-    // if forceAutoCloneMaster is not null, the pin will be cloned from forceAutoCloneMaster instead of
-    // it's own autoCloneMaster property
+    /**
+     * called by DaggerGraph after pins are connected to clone a pin
+     * if forceAutoCloneMaster is not null, the pin will be cloned from forceAutoCloneMaster instead of
+     * it's own autoCloneMaster property.
+     * @param {DaggerBasePin} pin 
+     * @param {DaggerBasePin} forceAutoCloneMaster
+     * @returns {DaggerBasePin}
+     */
     clonePin(pin, forceAutoCloneMaster = null) {
         if(pin.isInputPin) {
             let input = forceAutoCloneMaster ? forceAutoCloneMaster : pin.autoCloneMaster;
@@ -261,7 +354,11 @@ class DaggerNode extends DaggerBase {
         return null;
     }
 
-    // called by QDaggerGraph after pins are disconnected to determine if an autocloned pin should be removed
+    /**
+     * Called by DaggerGraph after pins are disconnected to determine if an autocloned pin should be removed
+     * @param {DaggerBasePin} pin
+     * @returns {boolean} 
+     */
     shouldRemoveClonePin(pin) {
         // does this have an autoclone master?
         if(pin.autoCloneMaster) {
@@ -270,7 +367,11 @@ class DaggerNode extends DaggerBase {
         return false;
     }
 
-    // called by QDaggerGraph to remove a cloned pin (The pin that is removed might not be the one that is requested).
+    /**
+     * Called by DaggerGraph to remove a cloned pin (The pin that is removed might not be the one that is requested).
+     * @param {DaggerBasePin} pin 
+     * @returns {boolean}
+     */
     removeClonePin(pin) {
         let parentCollection = pin.parent;
         if(pin.autoCloneMaster !== pin) {
@@ -289,15 +390,24 @@ class DaggerNode extends DaggerBase {
         return false;
     }
 
-    // override to allow a node to be able to decide if a pin can actually be removed.  Also usefull to detect that a pin is
-    // about to be removed.
+    /**
+     * Override to allow a node to be able to decide if a pin can actually be removed.  Also usefull to detect that a pin is
+     * about to be removed.
+     * @param {DaggerBasePin} pin 
+     * @returns {boolean}
+     */
     canRemovePin(pin) {
         return true;
     }
 
-    // override to add logic for a node to respond to being parented to a graph
+    /**
+     * Override to add logic for a node to respond to being parented to a graph
+     */
     addedToGraph() {}
 
+    /**
+     * Clean up when object hierarchy is unraveled.  Subclasses should always super.
+     */
     purgeAll() {
         super.purgeAll();
         for(let i = 0; i < DaggerTypes.MaxTopologyCount; i++) {

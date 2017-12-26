@@ -3,7 +3,17 @@
 const DaggerBase = require('./DaggerBase.js').DaggerBase;
 const DaggerSignal = require('./DaggerBase.js').DaggerSignal;
 
+/**
+ * Class that acts as a container for pins of one particular direction.
+ * @extends DaggerBase
+ */
 class DaggerPinCollection extends DaggerBase {
+    /**
+     * DaggerPinCollection ctor
+     * @param {DaggerNode} parentNode 
+     * @param {DaggerBasePin.PinDirection} direction 
+     * @param {number} topology_system 
+     */
     constructor(parentNode, direction, topology_system) {
         super();
         this._direction = direction;
@@ -17,10 +27,19 @@ class DaggerPinCollection extends DaggerBase {
         this.pinAdded = new DaggerSignal();     // void pinAdded(QDaggerBasePin * pin);
     }
 
+    /**
+     * Get the topology system this pin collection belongs to.
+     * @returns {number}
+     */
     get topologySystem() {
         return this._topology_system;
     }
 
+    /**
+     * Find and return a pin with the given name.
+     * @param {string} withName
+     * @returns {DaggerBasePin} 
+     */
     pin(withName) {
         if(this._pinCollection.hasOwnProperty(withName)) {
             return this._pinCollection[withName];
@@ -28,6 +47,12 @@ class DaggerPinCollection extends DaggerBase {
         return null;
     }
 
+    /**
+     * Add a given pin to this collection.
+     * @param {DaggerBasePin} pin 
+     * @param {string} name
+     * @returns {boolean} 
+     */
     addPin(pin, name) {
         if(!pin)
             return false;
@@ -67,6 +92,13 @@ class DaggerPinCollection extends DaggerBase {
         return true;
     }
 
+    /**
+     * Set the name for a given pin.  If the pin's name has already been set, and the pin isn't allowed to be renamed, 
+     * this will return 'false'
+     * @param {DaggerBasePin} pin 
+     * @param {string} name 
+     * @returns {boolean}
+     */
     setPinName(pin, name) {
         if(pin.name == name)
             return true;
@@ -86,6 +118,10 @@ class DaggerPinCollection extends DaggerBase {
         return true;
     }
 
+    /**
+     * Remove a given pin from this collection.
+     * @param {DaggerBasePin} pin 
+     */
     removePin(pin) {
         if(this._orderedCollection.includes(pin) && !pin.isConnected) {
             // ask my parent node if I can be removed first
@@ -103,7 +139,11 @@ class DaggerPinCollection extends DaggerBase {
         return false;
     }
 
-    // return the index of the given pin in the collection
+    /**
+     * Get the index of the given pin in the collection
+     * @param {DaggerBasePin} pin 
+     * @returns {number}
+     */
     index(pin) {
         return this._orderedCollection.indexOf(pin);
     }
@@ -122,11 +162,19 @@ class DaggerPinCollection extends DaggerBase {
         return this._direction;
     }
 
+    /**
+     * Get list of all the pins in the collection
+     * @returns {array}
+     */
     get allPins() {
         // return a copy, not the actual array
         return this._orderedCollection.slice();
     }
 
+    /**
+     * Get list of all pins in the collection that are not connected.
+     * @returns {array}
+     */
     get allNonConnectedPins() {
         let retv = [];
         for(let pin of this._orderedCollection) {
@@ -137,6 +185,11 @@ class DaggerPinCollection extends DaggerBase {
         return retv;
     }
 
+
+    /**
+     * Get list of all pins in the collection that are connected.
+     * @returns {array}
+     */
     get allConnectedPins() {
         let retv = [];
         for(let pin of this._orderedCollection) {
@@ -147,8 +200,10 @@ class DaggerPinCollection extends DaggerBase {
         return retv;
     }
 
+    /**
+     * Clean up when object hierarchy is unraveled.  Subclasses should always super.
+     */
     purgeAll() {
-
         for(let pin of this._orderedCollection)
         {
             pin.purgeAll();
@@ -157,6 +212,18 @@ class DaggerPinCollection extends DaggerBase {
         this._orderedCollection = [];
 
         super.purgeAll();
+    }
+
+    /**
+     * Find the first unconnected pin or null if no pins are unconnected.
+     * @returns {DaggerBasePin}
+     */
+    get firstUnconnectedPin() {
+        for(let p of this._orderedCollection) {
+            if(!p.isConnected)
+                return p;
+        }
+        return null;
     }
 }
 

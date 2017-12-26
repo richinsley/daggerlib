@@ -4,15 +4,22 @@
   "description": "API for working with Coffman-Graham style Directed Acyclic Graphs",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "docs": "jsdoc2md ./*.js > ./docs/api.md"
   },
   "author": "Rich Insley",
   "license": "MIT",
   "dependencies": {
     "uuid": "^3.1.0"
   },
+  "repository" :
+  { 
+    "type" : "git",
+    "url" : "https://github.com/richinsley/daggerlib"
+  },
   "devDependencies": {
     "chai": "^3.4.1",
+    "jsdoc-to-markdown": "^3.0.3",
     "mocha": "^3.0.2"
   }
 }

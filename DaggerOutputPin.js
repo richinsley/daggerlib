@@ -4,7 +4,14 @@ const DaggerBasePin = require('./DaggerBasePin.js').DaggerBasePin;
 const DaggerInputPin = require('./DaggerInputPin.js').DaggerInputPin;
 const DaggerTypes= require('./DaggerTypes.js');
 
+/**
+ * Class that represents a directed output out of a DaggerNode
+ * @extends DaggerBasePin
+ */
 class DaggerOutputPin extends DaggerBasePin {
+    /**
+     * DaggerOutputPin ctor
+     */
     constructor() {
         super();
         this._connectedTo = [];
@@ -13,26 +20,50 @@ class DaggerOutputPin extends DaggerBasePin {
         this._allowMultiConnect = true;
     }
 
+    /**
+     * Get the pin's direction
+     * @returns {DaggerBasePin.PinDirection.Output}
+     */
     get direction() {
         return DaggerBasePin.PinDirection.Output;
     }
 
+    /**
+     * Get list of all DaggerInputPins this pin is connected to.
+     * @returns {array}
+     */
     get connectedTo() {
         // make a shallow copy
         return this._connectedTo.slice();
     }
 
+    /**
+     * Get if this output pin allows for multiple connections (typically true)
+     * @returns {boolean}
+     */
     get allowMultiConnect() {
         return this._allowMultiConnect;
     }
+
+    /**
+     * Set if this output pin allows for multiple connections.
+     */
     set allowMultiConnect(val) {
         this._allowMultiConnect = val;
     }
 
+    /**
+     * Get if this pin has any connections.
+     * @returns {boolean}
+     */
     get isConnected() {
         return this._connectedTo.length !== 0;
     }
 
+    /**
+     * Get a list of instance IDs for each DaggerInputPin this pin is connected to.
+     * @returns {array}
+     */
     get connectedToUUIDs() {
         let retv = [];
         for(let pin of this._connectedTo) {
@@ -41,6 +72,11 @@ class DaggerOutputPin extends DaggerBasePin {
         return retv;
     }
 
+    /**
+     * Connect this pin to the given DaggerInputPin
+     * @param {DaggerInputPin} input
+     * @returns {boolean} 
+     */
     connectToInput(input) {
         if(!input) {
             // emitError("Input pin was null in connectToInput");
@@ -109,6 +145,11 @@ class DaggerOutputPin extends DaggerBasePin {
         return false;
     }
 
+    /**
+     * Get if this pin can connect to the given DaggerInputPin
+     * @param {DaggerInputPin} pin
+     * @returns {boolean} 
+     */
     canConnectToPin(pin) {
         if(!pin || !(pin instanceof DaggerInputPin))
             return false;
@@ -141,6 +182,12 @@ class DaggerOutputPin extends DaggerBasePin {
         return false;
     }
 
+    /**
+     * Disconnect this pin from the given DaggerInputPin
+     * @param {DaggerInputPin} ipin 
+     * @param {boolean} forceDisconnect - when true, the pin will disconnect regardless if the topology says it shouldn't
+     * @returns {boolean}
+     */
     disconnectPin(ipin, forceDisconnect) {
         // get the parent graph of this pin
         let parentGraph = this.parentNode.parentGraph;
@@ -177,6 +224,11 @@ class DaggerOutputPin extends DaggerBasePin {
         return false;
     }
 
+    /**
+     * Disconnect this pin from all DaggerInputPins.
+     * @param {boolean} forceDisconnect - when true, the pin will disconnect regardless if the topology says it shouldn't
+     * @returns {boolean}
+     */
     disconnectAll(forceDisconnect) {
         // walk backwards through the connected list and try to disconnect them
         let ccount = this._connectedTo.length;
@@ -190,6 +242,9 @@ class DaggerOutputPin extends DaggerBasePin {
         return true;
     }
 
+    /**
+     * Clean up when object hierarchy is unraveled.  Subclasses should always super.
+     */
     purgeAll() {
         super.purgeAll();
         this._connectedTo = [];

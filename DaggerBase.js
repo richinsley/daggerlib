@@ -1,5 +1,8 @@
 'use strict'
 
+/**
+ * Helper for UUID generation
+ */
 if (typeof window === 'object') {
     // HTML javascript implementation of uuid-v4
     uuid = {
@@ -13,19 +16,38 @@ if (typeof window === 'object') {
     var uuid = require('uuid');
 }
 
+/**
+ * Base class for all Dagger objects.
+ */
 class DaggerBase {
+    /**
+     * DaggerBase ctor
+     */
     constructor() {
         this._instanceID = uuid.v4();
         this._parent = null;
     }
 
+    /**
+     * Get the unique id for this instance
+     * @return {string}
+     */
     get instanceID() {
         return this._instanceID;
     }
 
+    /**
+     * Get the parent DaggerBase object this object belongs to
+     * @returns {DaggerBase}
+     */
     get parent() {
         return this._parent;
     }
+
+    /**
+     * Set the parent DaggerBase object this object belongs to
+     * @param {DaggerBase} 
+     */
     set parent(p) {
         this._parent = p; 
     }
@@ -61,6 +83,10 @@ class DaggerBase {
  * 
  */
 class DaggerSignal {
+    /**
+     * DaggerSignal ctor
+     * @param {*} implementation 
+     */
     constructor(implementation) {
         this._cb = [];
         if(typeof implementation === 'function') {
@@ -68,20 +94,34 @@ class DaggerSignal {
         }
     }
 
+    /**
+     * Add a connection callback
+     * @param {Function} slot 
+     */
     connect(slot) {
         this._cb[this._cb.length] = slot;
         return this;
     }
-
+    
+    /**
+     * Remove a connection callback
+     * @param {Function} slot 
+     */
     disconnect(slot) {
         var index = this._cb.indexOf(slot);
         if (index > -1) this._cb.splice(index, 1); 
     }
 
+    /**
+     * Remova all connection callbacks
+     */
     disconnectAll() {
         this._cb = [];
     }
 
+    /**
+     * Signal all connected callbacks
+     */
     emit() {
         for (var i = 0, len = this._cb.length; i < len; i++)
             this._cb[i].apply(this._cb[i], arguments);

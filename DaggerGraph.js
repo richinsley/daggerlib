@@ -59,7 +59,14 @@ let _recurseCalculateTopology = function(Me, level, node, touchedSet, topology_s
     return retv;
 }
 
+/**
+ * Class that represents a collection of DaggerNodes interconnected via DaggerBasePins
+ * @extends DaggerBase
+ */
 class DaggerGraph extends DaggerBase {
+    /**
+     * DaggerGraph ctor
+     */
     constructor() {
         super();
         this._nodes = [];
@@ -84,7 +91,7 @@ class DaggerGraph extends DaggerBase {
 
     /**
      * Get list of all nodes that have no connected input pins with the given topology
-     * @param {*} topology_system 
+     * @param {Number} topology_system 
      */
     topLevelNodes(topology_system = 0) {
         let retv = [];
@@ -97,6 +104,9 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
 
+    /**
+     * Called internally every time an action alters the topology of the graph.
+     */
     calculateTopology() {
         for(let t = 0; t < DaggerTypes.MaxTopologyCount; t++) {
             this._maxOrdinal[t] = 0;
@@ -193,22 +203,49 @@ class DaggerGraph extends DaggerBase {
         this.topologyChanged.emit();
     }
 
+    /**
+     * Get all the nodes in the graph
+     * @returns {array}
+     */
     get nodes() {
         return this._nodes.slice();
     }
 
+    /**
+     * Get the highest ordinal for the given topology system
+     * @param {Number} topology_system 
+     * @returns {Number}
+     */
     maxOrdinal(topology_system = 0) {
         return this._maxOrdinal[topology_system];
     }
 
+    /**
+     * Get the number of subgraphs in the DaggerGraph
+     * @param {Number} topology_system 
+     * @returns {Number}
+     */
     subGraphCount(topology_system = 0) {
         return  this._subGraphCount[topology_system]
     }
 
+    /**
+     * Called before two pins are disconnected to test if they are currently allowed to disconnect.  Override to
+     * provide logic for cases when pins are not allowed to disconnect (ie, data is being processed).  If the method
+     * returns false, the pins will fail to disconnect.
+     * @param {DaggerBasePin} connectFrom 
+     * @param {DaggerBasePin} connectTo 
+     * @returns {boolean}
+     */
     beforePinsConnected(connectFrom, connectTo) {
         return true;
     }
     
+    /**
+     * Called after two pins are connected to test if either needs to be cloned.
+     * @param {DaggerBasePin} connectFrom 
+     * @param {DaggerBasePin} connectTo 
+     */
     afterPinsConnected(connectFrom, connectTo) {
         // see if we should clone the output pin
         if(connectFrom.parentNode.shouldClonePin(connectFrom)) {
@@ -225,6 +262,11 @@ class DaggerGraph extends DaggerBase {
         }
     }
     
+    /**
+     * Get list of all nodes that have no connected input pins
+     * @param {Number} topology_system
+     * @returns {array}
+     */
     topLevelNodes(topology_system = 0) {
         let retv = [];
         for(let node of this._nodes) {
@@ -235,6 +277,11 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
     
+    /**
+     * Get list of all nodes that have no connected output pins
+     * @param {Number} topology_system
+     * @returns {array}
+     */
     bottomLevelNodes(topology_system = 0)
     {
         let retv = [];
@@ -246,6 +293,12 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
     
+    /**
+     * Returns a list of nodes in a certain subgraph with the given topology system
+     * @param {Number} index 
+     * @param {Number} topology_system
+     * @returns {array} 
+     */
     getSubGraphNodes(index, topology_system = 0) {
         let retv = [];
         if(index > this._subGraphCount[topology_system] - 1) {
@@ -261,6 +314,11 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
     
+    /**
+     * Return an array containing arrays of nodes for each subgraph in the graph
+     * @param {Number} topology_system
+     * @returns {array} 
+     */
     getSubGraphs(topology_system = 0) {
         let retv = [];
         for(let i = 0; i < this._subGraphCount[topology_system]; i++) {
@@ -269,6 +327,11 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
     
+    /**
+     * Get a list of all nodes with the given name.
+     * @param {string} name
+     * @returns {array} 
+     */
     getNodesWithName(name) {
         let retv = [];
         for(let node of this._nodes) {
@@ -279,6 +342,11 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
     
+    /**
+     * Find and return a pin that has the given instanceID
+     * @param {string} pinInstanceID 
+     * @returns {DaggerBasePin}
+     */
     getPinWithInstanceID(pinInstanceID) {
         for(let node of this._nodes) {
             for(let i = 0; i < DaggerTypes.MaxTopologyCount; i++) {
@@ -298,6 +366,11 @@ class DaggerGraph extends DaggerBase {
         return null;
     }
     
+    /**
+     * Find and return a node with the given instanceID
+     * @param {string} nodeInstanceID 
+     * @returns {DaggerNode}
+     */
     getNodeWithInstanceID(nodeInstanceID) {
         for(let node of this._nodes) {
             if(node.instanceID == nodeInstanceID)
@@ -306,6 +379,11 @@ class DaggerGraph extends DaggerBase {
         return null;
     }
     
+    /**
+     * Get an array of all DaggerInputPins that are connected
+     * @param {number} topology_system 
+     * @returns {array}
+     */
     allConnections(topology_system = 0) {
         let retv = [];
         for(let node of this._nodes) {
@@ -319,6 +397,11 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
     
+    /**
+     * Remove a node from the graph.  If the node has any connections, they are disconnected first
+     * @param {DaggerNode} node 
+     * @returns {boolean}
+     */
     removeNode(node) {
         if(!node) {
             return false;
@@ -348,6 +431,11 @@ class DaggerGraph extends DaggerBase {
         return false;
     }
     
+    /**
+     * Add a node to the graph
+     * @param {DaggerNode} node
+     * @returns {boolean} 
+     */
     addNode(node) {
         if(node.parentGraph != null) {
             // emitError("QDaggerNode is already associated with a QDaggerGraph");

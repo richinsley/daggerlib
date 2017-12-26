@@ -3,20 +3,39 @@
 const DaggerBasePin = require('./DaggerBasePin.js').DaggerBasePin;
 const DaggerTypes= require('./DaggerTypes.js');
 
+/**
+ * Class that represents a directed input into a DaggerNode
+ * @extends DaggerBasePin
+ */
 class DaggerInputPin extends DaggerBasePin {
+    /**
+     * DaggerInputPin ctor
+     */
     constructor() {
         super();
         this._connectedTo = null;
     }
 
+    /**
+     * Get the pin's direction
+     * @returns {DaggerBasePin.PinDirection.Input}
+     */
     get direction() {
         return DaggerBasePin.PinDirection.Input;
     }
 
+    /**
+     * Get the DaggerOutputPin this pin is connected to
+     * @returns {DaggerOutputPin}
+     */
     get connectedTo() {
         return this._connectedTo;
     }
 
+    /**
+     * Get the instance ID of the DaggerOutputPin this pin is connected to.
+     * @returns {string}
+     */
     get connectedToUUID() {
         if(this.isConnected) {
             return this._connectedTo.instanceUUID;
@@ -25,10 +44,18 @@ class DaggerInputPin extends DaggerBasePin {
         return "00000000-0000-0000-0000-000000000000";
     }
 
+    /**
+     * Get if this pin is connected
+     * @returns {boolean}
+     */
     get isConnected() {
         return (this._connectedTo !== null) ? true : false;
     }
 
+    /**
+     * Returns true if this pin can connect to the given DaggerOutputPin
+     * @param {DaggerOutputPin} pin 
+     */
     canConnectToPin(pin) {
         let tsystem = this.topologySystem;
         if(tsystem != pin.topologySystem) {
@@ -56,7 +83,11 @@ class DaggerInputPin extends DaggerBasePin {
         return retv;
     }
 
-    disconnectPin(forceDisconnect = true) {
+    /**
+     * Disconnects this pin.
+     * @param {boolean} forceDisconnect - when true, the pin will disconnect regardless if the topology says it shouldn't
+     */
+    disconnectPin(forceDisconnect = false) {
         if (this._parentNode === null)
             return false;
     
@@ -70,15 +101,9 @@ class DaggerInputPin extends DaggerBasePin {
         return true;
     }
 
-    // because DaggerOutputPin actually performs all the work of connecting/disconnecting, we need these internal methods
-    // to let DaggerOutputPin raise the connection Notification events on DaggerInput
-    _invokeConnectPin(to) {
-        this.pinConnected.emit(to);
-    }
-    _invokeDisconnectPin(from) {
-        this.pinDisconnected.emit(from);
-    }
-
+    /**
+     * Clean up when object hierarchy is unraveled.  Subclasses should always super.
+     */
     purgeAll() {
         super.purgeAll();
         this._connectedTo = null;
