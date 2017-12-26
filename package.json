@@ -7,16 +7,31 @@
     "test": "mocha",
     "docs": "jsdoc2md ./*.js > ./docs/api.md"
   },
-  "author": "Rich Insley",
+  "author": {
+    "name": "Rich Insley",
+    "email": "richinsley@gmail.com",
+    "url": "https://github.com/richinsley"
+  },
   "license": "MIT",
+  "homepage": "https://github.com/richinsley/daggerlib",
   "dependencies": {
     "uuid": "^3.1.0"
   },
   "repository" :
   { 
     "type" : "git",
-    "url" : "https://github.com/richinsley/daggerlib"
+    "url" : "https://github.com/richinsley/daggerlib.git"
   },
+  "keywords": [
+    "graph",
+    "node",
+    "dag",
+    "Coffman-Graham",
+    "dagger",
+    "directed acyclic graph",
+    "Sugiyama",
+    "pipeline"
+  ],
   "devDependencies": {
     "chai": "^3.4.1",
     "jsdoc-to-markdown": "^3.0.3",
