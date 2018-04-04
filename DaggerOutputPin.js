@@ -79,7 +79,7 @@ class DaggerOutputPin extends DaggerBasePin {
      */
     connectToInput(input) {
         if(!input) {
-            // emitError("Input pin was null in connectToInput");
+            this.emitError("Input pin was null in connectToInput");
             return false;
         }
     
@@ -87,39 +87,41 @@ class DaggerOutputPin extends DaggerBasePin {
         let inputpincontainer = input.parentNode.parentGraph;
     
         if (outputpincontainer == null) {
-            // emitError("Output pin is not associated with a DaggerNode or DaggerGraph");
+            this.emitError("Output pin is not associated with a DaggerNode or DaggerGraph");
             return false;
         }
     
         if (inputpincontainer == null) {
-            // emitError("Input pin is not associated with a DaggerNode or DaggerGraph");
+            this.emitError("Input pin is not associated with a DaggerNode or DaggerGraph");
             return false;
         }
     
         if (inputpincontainer != outputpincontainer) {
-            // emitError("Input pin and Output pin are not associated with the same DaggerGraph");
+            this.emitError("Input pin and Output pin are not associated with the same DaggerGraph");
             return false;
         }
     
-        if(!input.canConnectToPin(this)) {
-            // emitError("Input pin cannot connect to this output pin");
-            return false;
+        if(this._parentNode.parentGraph.enableTopology) {
+            if(!input.canConnectToPin(this)) {
+                this.emitError("Input pin indicates it cannot connect to this output pin");
+                return false;
+            }
+        
+            if(!this.canConnectToPin(input)) {
+                this.emitError("Parent node indicates Input pin cannot connect to this output pin");
+                return false;
+            }
         }
-    
-        if(!this.canConnectToPin(input)) {
-            // emitError("Input pin cannot connect to this output pin");
-            return false;
-        }
-    
+
         if(input.isConnected) {
             if(input.autoCloneMaster) {
-                // emitError(("cannot swap connections on cloned pins"));
+                this.emitError(("cannot swap connections on cloned pins"));
                 return false;
             }
     
             // try to disconnect the input pin from it's previous connection
             if(!input.disconnectPin(false)) {
-                // emitError("Input pin is already connected and was not allowed to disconnect");
+                this.emitError("Input pin is already connected and was not allowed to disconnect");
                 return false;
             }
         }
@@ -233,7 +235,7 @@ class DaggerOutputPin extends DaggerBasePin {
         // walk backwards through the connected list and try to disconnect them
         let ccount = this._connectedTo.length;
         for(let i = ccount - 1; i > -1; i--) {
-            let pin = _connectedTo[i];
+            let pin = this._connectedTo[i];
             if(!pin.disconnectPin(forceDisconnect)) {
                 // we failed to disconnect a pin
                 return false;

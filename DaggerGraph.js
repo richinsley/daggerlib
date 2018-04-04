@@ -40,7 +40,8 @@ let _recurseCalculateTopology = function(Me, level, node, touchedSet, topology_s
 
     // recreate our _descendents List from the new set
     for(let snode of retv) {
-        if(!node._descendents[topology_system].includes(snode)) {
+        // if(!node._descendents[topology_system].includes(snode)) {
+            if(node._descendents[topology_system].indexOf(snode) < 0) {
             node._descendents[topology_system].push(snode);
         }
     }
@@ -87,6 +88,8 @@ class DaggerGraph extends DaggerBase {
 
         // init topology
         this.calculateTopology();
+
+        this._topologyEnabled = true;
     }
 
     /**
@@ -104,10 +107,26 @@ class DaggerGraph extends DaggerBase {
         return retv;
     }
 
+    get enableTopology() {
+        return this._topologyEnabled;
+    }
+
+    set enableTopology(enabled) {
+        if(enabled == this._topologyEnabled) {
+            return;
+        }
+
+        // if we are re-enabling the topology, calculate it now
+        this._topologyEnabled = enabled;
+        this.calculateTopology();
+    }
     /**
      * Called internally every time an action alters the topology of the graph.
      */
     calculateTopology() {
+        if(!this._topologyEnabled)
+            return;
+
         for(let t = 0; t < DaggerTypes.MaxTopologyCount; t++) {
             this._maxOrdinal[t] = 0;
 
@@ -145,7 +164,8 @@ class DaggerGraph extends DaggerBase {
 
                         // recreate our _descendents List from the newset
                         for(let setnode of newset) {
-                            if(!node._descendents[t].includes(setnode)) {
+                            // if(!node._descendents[t].includes(setnode)) {
+                            if(node._descendents[t].indexOf(setnode) < 0) {
                                 node._descendents[t].push(setnode);
                             }
                         }
@@ -436,7 +456,7 @@ class DaggerGraph extends DaggerBase {
      * @param {DaggerNode} node
      * @returns {boolean} 
      */
-    addNode(node) {
+    addNode(node, calculate = true) {
         if(node.parentGraph != null) {
             // emitError("QDaggerNode is already associated with a QDaggerGraph");
             return null;
@@ -445,13 +465,38 @@ class DaggerGraph extends DaggerBase {
         node.beforeAddedToGraph.emit(); // tell the node to signal that the node is about to be added to a graph
         node._parentGraph = this;
         this._nodes.push(node);
-        this.calculateTopology();
+        if(calculate)
+            this.calculateTopology();
         this.nodeAdded.emit(node);
         node.addedToGraph(); // tell the node to signal that it was added to a graph
         node.afterAddedToGraph.emit();
         return node;
     }
     
+    addNodes(nodes) {
+        let i = 0;
+        for(i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+            if(node.parentGraph != null) {
+                // emitError("QDaggerNode is already associated with a QDaggerGraph");
+                return null;
+            }
+        }
+
+        for(i = 0; i < nodes.length; i++) {
+            let node = nodes[i];
+            node.beforeAddedToGraph.emit(); // tell the node to signal that the node is about to be added to a graph
+            node._parentGraph = this;
+            this._nodes.push(node);
+            this.nodeAdded.emit(node);
+            node.addedToGraph(); // tell the node to signal that it was added to a graph
+            node.afterAddedToGraph.emit();
+        }
+        this.calculateTopology();
+
+        return nodes;
+    }
+
     beforeNodeRemoved(node) {
         return true;
     }

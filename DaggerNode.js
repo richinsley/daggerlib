@@ -119,9 +119,10 @@ class DaggerNode extends DaggerBase {
      * @returns {array}
      */
     ascendents(topology_system = 0) {
-        // any node in my subgraph that contains me as a descendent is on of my ascendents
+        // any node in my subgraph that contains me as a descendent is one of my ascendents
         let retv = [];
         if(this.parentGraph) {
+            /*
             let mysubgraph = this._subgraphAffiliation[topology_system];
             let sl = this.parentGraph.getSubGraphNodes(mysubgraph, topology_system);
             for(let n of sl) {
@@ -129,6 +130,13 @@ class DaggerNode extends DaggerBase {
                     retv.push(n);
                 }
             }
+            */
+           let all = this.parentGraph.nodes;
+           for(let i = 0; i < all.length; i++) {
+               if(all[i] != this && all[i].descendents(topology_system).indexOf(this) >= 0) {
+                   retv.push(all[i]);
+               }
+           }
         }
         return retv;
     }

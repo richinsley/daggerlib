@@ -60,6 +60,7 @@ class DaggerInputPin extends DaggerBasePin {
         let tsystem = this.topologySystem;
         if(tsystem != pin.topologySystem) {
             // pins must belong to the same topology system
+            this.emitError("pins must belong to the same topology system");
             return false;
         }
     
@@ -70,16 +71,20 @@ class DaggerInputPin extends DaggerBasePin {
     
         if(this.parentNode == pin.parentNode) {
             // big NO-NO!
+            this.emitError("pins belong to the same parent node");
             return false;
         }
     
         let retv = false;
-        if(!this.parentNode.descendents(tsystem).includes(pin.parentNode)) {
-            retv = super.canConnectToPin(pin);
-        } else if(pin.parentNode.ordinal(tsystem) <= this.parentNode.ordinal(tsystem)) {
-            retv = super.canConnectToPin(pin);
+        if(this._parentNode.parentGraph.enableTopology) {
+            if(!this.parentNode.descendents(tsystem).includes(pin.parentNode)) {
+                retv = super.canConnectToPin(pin);
+            } else if(pin.parentNode.ordinal(tsystem) <= this.parentNode.ordinal(tsystem)) {
+                retv = super.canConnectToPin(pin);
+            }
+        } else {
+            retv = true;
         }
-    
         return retv;
     }
 

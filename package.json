@@ -1,6 +1,6 @@
 {
   "name": "daggerlib",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "API for working with Coffman-Graham style Directed Acyclic Graphs",
   "main": "index.js",
   "scripts": {

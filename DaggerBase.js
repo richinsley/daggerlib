@@ -52,6 +52,10 @@ class DaggerBase {
         this._parent = p; 
     }
 
+    emitError(err) {
+        console.log(err);
+    }
+    
     purgeAll() {}
 }
 
