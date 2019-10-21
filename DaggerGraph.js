@@ -67,12 +67,14 @@ let _recurseCalculateTopology = function(Me, level, node, touchedSet, topology_s
 class DaggerGraph extends DaggerBase {
     /**
      * DaggerGraph ctor
+     * @param {Number} topologycount 
      */
-    constructor() {
+    constructor(topologycount = 1) {
         super();
         this._nodes = [];
         this._subGraphCount = [];
         this._maxOrdinal = [];
+        this._topologycount = topologycount;
 
         for(let i = 0; i < DaggerTypes.MaxTopologyCount; i++) {
             this._subGraphCount[i] = 0;
@@ -127,7 +129,7 @@ class DaggerGraph extends DaggerBase {
         if(!this._topologyEnabled)
             return;
 
-        for(let t = 0; t < DaggerTypes.MaxTopologyCount; t++) {
+        for(let t = 0; t < this._topologycount; t++) {
             this._maxOrdinal[t] = 0;
 
             // reset all presidence values and subgraph affiliations to -1
@@ -369,7 +371,7 @@ class DaggerGraph extends DaggerBase {
      */
     getPinWithInstanceID(pinInstanceID) {
         for(let node of this._nodes) {
-            for(let i = 0; i < DaggerTypes.MaxTopologyCount; i++) {
+            for(let i = 0; i < this._topologycount; i++) {
                 // look in the input pins
                 let retv = node.inputPins(i).getPinWithInstanceID(pinInstanceID);
                 if(retv) {
@@ -456,7 +458,7 @@ class DaggerGraph extends DaggerBase {
      * @param {DaggerNode} node
      * @returns {boolean} 
      */
-    addNode(node, calculate = true) {
+    addNode(node, calculate = false) {
         if(node.parentGraph != null) {
             // emitError("QDaggerNode is already associated with a QDaggerGraph");
             return null;
@@ -465,8 +467,21 @@ class DaggerGraph extends DaggerBase {
         node.beforeAddedToGraph.emit(); // tell the node to signal that the node is about to be added to a graph
         node._parentGraph = this;
         this._nodes.push(node);
-        if(calculate)
+
+        if(calculate) {
             this.calculateTopology();
+        } else {
+            // adding a single node before connections has an easily determined
+            // effect on the topology
+            for(let t = 0; t < this._topologycount; t++) {
+                this._subGraphCount[t] ++;
+                this._maxOrdinal[t] = Math.max(1, this._maxOrdinal[t]);
+                node._subgraphAffiliation[t] = this.subGraphCount(t) + 1;
+                node._ordinal[t] = 0;
+                node._descendents[t] = [];
+            }
+        }
+
         this.nodeAdded.emit(node);
         node.addedToGraph(); // tell the node to signal that it was added to a graph
         node.afterAddedToGraph.emit();

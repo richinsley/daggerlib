@@ -1,6 +1,6 @@
 {
   "name": "daggerlib",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "API for working with Coffman-Graham style Directed Acyclic Graphs",
   "main": "index.js",
   "scripts": {
@@ -17,10 +17,9 @@
   "dependencies": {
     "uuid": "^3.1.0"
   },
-  "repository" :
-  { 
-    "type" : "git",
-    "url" : "https://github.com/richinsley/daggerlib.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/richinsley/daggerlib.git"
   },
   "keywords": [
     "graph",
@@ -34,7 +33,7 @@
   ],
   "devDependencies": {
     "chai": "^3.4.1",
-    "jsdoc-to-markdown": "^3.0.3",
-    "mocha": "^3.0.2"
+    "jsdoc-to-markdown": "^5.0.2",
+    "mocha": "^6.2.2"
   }
 }

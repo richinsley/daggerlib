@@ -181,7 +181,7 @@ class DaggerNode extends DaggerBase {
      * Disconnect all this node's pins on all of it's topologies.
      */
     disconnectAllPins() {
-        for(let i = 0; i < DaggerTypes.MaxTopologyCount; i++) {
+        for(let i = 0; i < this._parentGraph._topologycount; i++) {
 
             // go in reverse order to prevent autocloned pins from throwing off their collection iteration
             let alloutput = this._outputPins[i].allPins;

@@ -166,7 +166,7 @@ describe('Daggerlib', function () {
                         |4      |
                         +-------+
                `, () => {
-    let graph = new Dagger.DaggerGraph();
+    let graph = new Dagger.DaggerGraph(2);
     let node1 = graph.addNode(new DaggerTestNode());
     let node2 = graph.addNode(new DaggerTestNode());
     let node3 = graph.addNode(new DaggerTestNode());
